@@ -99,7 +99,7 @@ class MoreView {
             <div class="more-item-icon bg-teal">ℹ️</div>
             <div class="more-item-body">
               <strong>About Mini Science Lab</strong>
-              <span>Version 2.0.0 & Child Safety</span>
+              <span>Version 2.2.0 & Child Safety</span>
             </div>
             <span class="more-item-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
@@ -111,7 +111,7 @@ class MoreView {
               <strong style="color:#ef4444;">Exit Application</strong>
               <span>Safe exit confirmation</span>
             </div>
-            <span class="more-item-arrow">➡️</span>
+            <span class="more-item-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
         </div>
       </div>

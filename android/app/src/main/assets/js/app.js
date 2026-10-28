@@ -25,7 +25,6 @@ class MiniScienceApp {
     // Containers
     this.mainContainer = document.getElementById('main-screen-container');
     this.bottomNav = document.getElementById('bottom-nav-bar');
-    this.offlineBanner = document.getElementById('offline-toast');
 
     this.init();
   }
@@ -41,7 +40,7 @@ class MiniScienceApp {
     // Bind bottom navigation tabs
     this.bindBottomNav();
 
-    // Check network status
+    // App operates 100% offline seamlessly
     this.bindNetworkListener();
 
     // Register Service Worker for offline PWA
@@ -63,15 +62,9 @@ class MiniScienceApp {
   }
 
   bindNetworkListener() {
+    // Native offline app: gracefully handle network events silently with zero intrusive popups
     const updateOnlineStatus = () => {
-      if (!navigator.onLine) {
-        if (this.offlineBanner) {
-          this.offlineBanner.classList.add('visible');
-          setTimeout(() => {
-            this.offlineBanner.classList.remove('visible');
-          }, 4000);
-        }
-      }
+      console.log('Network state updated. App is 100% offline capable.');
     };
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);

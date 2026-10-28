@@ -69,7 +69,7 @@ class MyLabView {
           <div class="ring-info-col">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h4>My Progress</h4>
-              <span style="font-size:12px; color:#0284c7; font-weight:bold;">View Details ➡️</span>
+              <span style="font-size:12px; color:#0284c7; font-weight:bold; display:flex; align-items:center; gap:2px;">View Details ${window.CHEVRON_RIGHT_SVG}</span>
             </div>
             <p>Overall scientific curriculum completion</p>
             <div class="progress-pills-row">
@@ -89,7 +89,7 @@ class MyLabView {
               <h4>Learning Progress</h4>
               <p>Overall percentage and subject breakdowns</p>
             </div>
-            <span class="mylab-menu-arrow">➡️</span>
+            <span class="mylab-menu-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
 
           <!-- 2. Completed Activities Link (Screen 26) -->
@@ -99,7 +99,7 @@ class MyLabView {
               <h4>Completed Activities</h4>
               <p>${completedExps.length + completedSims.length} experiments & simulations completed</p>
             </div>
-            <span class="mylab-menu-arrow">➡️</span>
+            <span class="mylab-menu-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
 
           <!-- 3. Quiz History -->
@@ -109,7 +109,7 @@ class MyLabView {
               <h4>Quiz History & Scores</h4>
               <p>${completedQuizzes.length} quiz scores and answers recorded</p>
             </div>
-            <span class="mylab-menu-arrow">➡️</span>
+            <span class="mylab-menu-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
 
           <!-- 4. Science Journal -->
@@ -119,7 +119,7 @@ class MyLabView {
               <h4>My Science Journal</h4>
               <p>${notes.length} personal lab notes & observations</p>
             </div>
-            <span class="mylab-menu-arrow">➡️</span>
+            <span class="mylab-menu-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
 
           <!-- 5. Saved Favourites -->
@@ -129,7 +129,7 @@ class MyLabView {
               <h4>Saved Favourites</h4>
               <p>${favExps.length + favFacts.length} bookmarked activities & facts</p>
             </div>
-            <span class="mylab-menu-arrow">➡️</span>
+            <span class="mylab-menu-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
         </div>
       </div>
@@ -570,7 +570,7 @@ class MyLabView {
                 <strong>${it.title}</strong>
                 <span>${it.category} • ${it.favType === 'experiment' ? `⏱️ ${it.duration}` : 'Science Fact'}</span>
               </div>
-              <span class="fav-open-arrow">➡️</span>
+              <span class="fav-open-arrow">${window.CHEVRON_RIGHT_SVG}</span>
             </div>
           `).join('')}
         </div>

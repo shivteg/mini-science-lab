@@ -170,6 +170,16 @@ def main():
     downloads_apk = os.path.join(downloads, "MiniScienceLab.apk")
     shutil.copy2(final_apk, downloads_apk)
 
+    # Copy to Phone Downloads via CrossDevice if accessible
+    phone_download = r"C:\Users\user\CrossDevice\Shivteg's A12 (2)\storage\Download"
+    if os.path.exists(phone_download):
+        try:
+            phone_apk = os.path.join(phone_download, "MiniScienceLab.apk")
+            shutil.copy2(final_apk, phone_apk)
+            print(f"Copied directly to Phone: {phone_apk}")
+        except Exception as e:
+            print(f"Could not copy to phone directly: {e}")
+
     apk_size_mb = os.path.getsize(final_apk) / (1024 * 1024)
     print("========================================")
     print("SUCCESS! APK Built Successfully!")

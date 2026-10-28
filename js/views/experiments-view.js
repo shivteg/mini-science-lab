@@ -420,10 +420,10 @@ class ExperimentsView {
         <!-- Navigation Buttons -->
         <div class="step-actions-row">
           <button class="btn-secondary-fun" id="btn-prev-step" ${this.currentStep === 0 ? 'disabled' : ''}>
-            ⬅️ Previous
+            <span style="display:inline-flex; align-items:center; gap:4px;">${window.BACK_ICON_SVG} Previous</span>
           </button>
           <button class="btn-primary-fun" id="btn-next-step">
-            ${this.currentStep === totalSteps - 1 ? 'Finish & See Results 🎉' : 'Next Step ➡️'}
+            <span style="display:inline-flex; align-items:center; gap:4px;">${this.currentStep === totalSteps - 1 ? 'Finish & See Results 🎉' : `Next Step ${window.CHEVRON_RIGHT_SVG}`}</span>
           </button>
         </div>
       </div>

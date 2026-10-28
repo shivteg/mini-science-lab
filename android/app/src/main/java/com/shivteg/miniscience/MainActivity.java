@@ -32,6 +32,16 @@ public class MainActivity extends Activity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.setStatusBarColor(Color.parseColor("#0284c7"));
 
+        // Match system navigation bar color to clean white app bottom dock
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            window.setNavigationBarColor(Color.parseColor("#ffffff"));
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            window.getDecorView().setSystemUiVisibility(
+                window.getDecorView().getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            );
+        }
+
         // Setup full screen WebView filling 100% of device width and height
         webView = new WebView(this);
         webView.setLayoutParams(new ViewGroup.LayoutParams(

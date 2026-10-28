@@ -190,7 +190,7 @@ class QuizView {
         </div>
 
         <button class="btn-primary-fun btn-block" id="btn-feedback-next">
-          ${this.questionIndex === this.currentQuiz.questions.length - 1 ? 'See Quiz Results 🏆' : 'Next Question ➡️'}
+          ${this.questionIndex === this.currentQuiz.questions.length - 1 ? 'See Quiz Results 🏆' : 'Next Question ➔'}
         </button>
       </div>
     `;

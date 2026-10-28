@@ -105,7 +105,7 @@ class SettingsView {
           <div class="settings-menu-row" id="row-help-about">
             <div class="settings-row-text">
               <strong>ℹ️ About Mini Science Lab</strong>
-              <span>Version 2.0.0 & Credits</span>
+              <span>Version 2.2.0 & Credits</span>
             </div>
             <span class="more-item-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
