@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.Executors;
@@ -162,6 +163,9 @@ public class MainActivity extends Activity {
         // Load offline asset bundle directly
         webView.loadUrl("file:///android_asset/index.html");
 
+        // Register device on cloud server
+        registerDeviceWithCloud();
+
         // Start background notification synchronization loop
         startBackgroundPoller();
     }
@@ -240,6 +244,46 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
+    private void registerDeviceWithCloud() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                    String deviceId = prefs.getString("device_unique_id", null);
+                    if (deviceId == null) {
+                        deviceId = "android_" + (Build.MODEL != null ? Build.MODEL.hashCode() : 0) + "_" + System.currentTimeMillis();
+                        prefs.edit().putString("device_unique_id", deviceId).apply();
+                    }
+
+                    String deviceName = Build.MANUFACTURER + " " + Build.MODEL;
+                    URL url = new URL("https://os.shivteg.com/api/devices/register");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setDoOutput(true);
+                    conn.setConnectTimeout(6000);
+                    conn.setReadTimeout(6000);
+
+                    JSONObject body = new JSONObject();
+                    body.put("deviceId", deviceId);
+                    body.put("name", deviceName);
+                    body.put("platform", "Android " + Build.VERSION.RELEASE);
+                    body.put("appVersion", "2.3.0");
+
+                    byte[] out = body.toString().getBytes("UTF-8");
+                    OutputStream os = conn.getOutputStream();
+                    os.write(out);
+                    os.flush();
+                    os.close();
+
+                    conn.getResponseCode();
+                    conn.disconnect();
+                } catch (Exception ignored) {}
+            }
+        }).start();
+    }
+
     private void startBackgroundPoller() {
         if (backgroundScheduler != null && !backgroundScheduler.isShutdown()) {
             return;
@@ -251,13 +295,17 @@ public class MainActivity extends Activity {
             public void run() {
                 pollCloudNotifications();
             }
-        }, 5, 20, TimeUnit.SECONDS);
+        }, 2, 15, TimeUnit.SECONDS);
     }
 
     private void pollCloudNotifications() {
         try {
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
             long lastTime = prefs.getLong(KEY_LAST_NOTIF_TIME, 0L);
+            if (lastTime == 0L) {
+                // If first app launch, fetch any alerts from past 2 hours
+                lastTime = System.currentTimeMillis() - (2 * 60 * 60 * 1000L);
+            }
 
             URL url = new URL(POLL_ENDPOINT + lastTime);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -293,7 +341,7 @@ public class MainActivity extends Activity {
                             if (ts > lastTime && !body.isEmpty()) {
                                 postNotification(title, body, notifId);
 
-                                // Also deliver to webview if active
+                                // Deliver to WebView if active
                                 final String jsTitle = title.replace("'", "\\'");
                                 final String jsBody = body.replace("'", "\\'");
                                 final String jsId = notifId;

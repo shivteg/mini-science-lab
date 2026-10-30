@@ -24,16 +24,40 @@ class NotificationService {
       }, false); // false = already posted by Java to Android status bar
     };
 
-    // 2. Connect to Server-Sent Events (SSE) stream for instant real-time pushes
+    // 2. Register this device with cloud server
+    this.registerDevice();
+
+    // 3. Connect to Server-Sent Events (SSE) stream for instant real-time pushes
     this.connectSSE();
 
-    // 3. Fallback sync polling every 20 seconds
+    // 4. Fallback sync polling every 15 seconds
     this.startPolling();
 
-    // 4. Try browser WebPush subscription if in browser/PWA environment
+    // 5. Try browser WebPush subscription if in browser/PWA environment
     if (!this.isNative && 'serviceWorker' in navigator && 'PushManager' in window) {
       this.initWebPush();
     }
+  }
+
+  registerDevice() {
+    try {
+      let devId = localStorage.getItem('msl_device_id');
+      if (!devId) {
+        devId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        localStorage.setItem('msl_device_id', devId);
+      }
+      const platform = this.isNative ? 'Android APK' : (navigator.userAgent.includes('Mobile') ? 'Mobile Web' : 'Desktop Web');
+      fetch(`${this.serverUrl}/api/devices/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          deviceId: devId,
+          name: this.isNative ? 'Android App User' : 'Web Science Student',
+          platform: platform,
+          appVersion: '2.3.0'
+        })
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   async connectSSE() {
@@ -73,14 +97,18 @@ class NotificationService {
     if (this.pollInterval) clearInterval(this.pollInterval);
     this.pollInterval = setInterval(() => {
       this.syncRecentNotifications();
-    }, 20000);
+    }, 15000);
     // Initial sync
-    setTimeout(() => this.syncRecentNotifications(), 1500);
+    setTimeout(() => this.syncRecentNotifications(), 1200);
   }
 
   async syncRecentNotifications() {
     try {
-      const lastSeen = this.getLastSeenTimestamp();
+      let lastSeen = this.getLastSeenTimestamp();
+      if (!lastSeen) {
+        // If first launch, sync past 2 hours
+        lastSeen = Date.now() - (2 * 60 * 60 * 1000);
+      }
       const res = await fetch(`${this.serverUrl}/api/notifications/poll?since=${lastSeen}`);
       if (!res.ok) return;
       const data = await res.json();
@@ -285,9 +313,46 @@ class NotificationService {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (!sub) {
-        // Can subscribe if user enabled in Settings
+        // Can subscribe if user enabled in Settings or requested
+        this.askWebPushPermission();
       }
     } catch (e) {}
+  }
+
+  async askWebPushPermission() {
+    if (Notification.permission === 'default') {
+      try {
+        const res = await fetch(`${this.serverUrl}/vapidPublicKey`);
+        const { publicKey } = await res.json();
+        if (!publicKey) return;
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const reg = await navigator.serviceWorker.ready;
+          const subscription = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: this.urlBase64ToUint8Array(publicKey)
+          });
+          await fetch(`${this.serverUrl}/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(subscription)
+          });
+          console.log('[MiniScience] WebPush registered with cloud hub successfully!');
+        }
+      } catch (err) {
+        console.log('[MiniScience] Push auto-subscribe skipped:', err.message);
+      }
+    }
+  }
+
+  urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
   }
 }
 
