@@ -103,13 +103,6 @@ public class MainActivity extends Activity {
         // Initialize Android notification channel
         initNotificationChannel();
 
-        // Request POST_NOTIFICATIONS permission for Android 13+ (API 33+)
-        if (Build.VERSION.SDK_INT >= 33) {
-            if (checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 1001);
-            }
-        }
-
         // Setup full screen WebView filling 100% of device width and height
         webView = new WebView(this);
         webView.setLayoutParams(new ViewGroup.LayoutParams(
@@ -121,11 +114,8 @@ public class MainActivity extends Activity {
         webView.setHorizontalScrollBarEnabled(false);
         webView.setBackgroundColor(Color.parseColor("#f0f9ff"));
 
-        // Force purge any old web cache on startup
+        // Clear web cache on startup (preserve localStorage for notification state)
         webView.clearCache(true);
-        webView.clearFormData();
-        webView.clearHistory();
-        WebStorage.getInstance().deleteAllData();
 
         setContentView(webView);
 
@@ -162,6 +152,14 @@ public class MainActivity extends Activity {
 
         // Load offline asset bundle directly
         webView.loadUrl("file:///android_asset/index.html");
+
+        // Request notification permission AFTER the activity is fully visible (delayed)
+        webView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                requestNotificationPermission();
+            }
+        }, 1500);
 
         // Register device on cloud server
         registerDeviceWithCloud();
@@ -368,6 +366,28 @@ public class MainActivity extends Activity {
             conn.disconnect();
         } catch (Exception ignored) {
             // Offline or server unreachable - silent fail, retry next cycle
+        }
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 1001);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted — notifications will work
+                System.out.println("POST_NOTIFICATIONS permission GRANTED");
+            } else {
+                // Permission denied — notifications silently fail
+                System.out.println("POST_NOTIFICATIONS permission DENIED by user");
+            }
         }
     }
 
