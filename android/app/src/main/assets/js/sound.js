@@ -123,6 +123,34 @@ class SoundEngine {
     });
   }
 
+  // Harmonic notification chime for incoming cloud science alerts
+  notification() {
+    if (!this.soundEnabled) return;
+    const ctx = this.ensureContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const notes = [587.33, 880, 1174.66]; // D5, A5, D6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = now + i * 0.08;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.22, startTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.35);
+    });
+  }
+
   // Gentle kid-friendly incorrect tone
   wrong() {
     if (!this.soundEnabled) return;

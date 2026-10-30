@@ -44,6 +44,13 @@ class HomeView {
               <span class="xp-number">${stats.xp} XP</span>
               <span class="level-tag">Lvl ${stats.level}</span>
             </div>
+            <button class="btn-header-action" id="btn-home-notifications" title="Notifications" aria-label="Notifications" style="position: relative;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <span class="notif-badge-counter" style="display: none;">0</span>
+            </button>
             <button class="btn-header-action" id="btn-home-settings" title="Settings" aria-label="Settings">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"></circle>
@@ -152,6 +159,9 @@ class HomeView {
     `;
 
     this.bindEvents(container);
+    if (window.notificationService) {
+      window.notificationService.updateNotificationBadge();
+    }
   }
 
   bindEvents(container) {
@@ -165,6 +175,11 @@ class HomeView {
 
     bind('#btn-header-profile', () => this.app.navigate('profile_setup'));
     bind('#btn-header-xp', () => this.app.navigate('my_lab'));
+    bind('#btn-home-notifications', () => {
+      if (window.notificationService) {
+        window.notificationService.openNotificationCenter();
+      }
+    });
     bind('#btn-home-settings', () => this.app.navigate('settings'));
     bind('#home-card-experiments', () => this.app.navigate('experiments'));
     bind('#home-card-simulations', () => this.app.navigate('simulations'));

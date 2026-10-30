@@ -74,6 +74,27 @@ class SettingsView {
           </div>
         </div>
 
+        <!-- Cloud Push Notifications -->
+        <div class="settings-group-card">
+          <h4>🔔 Cloud Push Notifications</h4>
+          
+          <div class="settings-menu-row" id="row-view-notifs">
+            <div class="settings-row-text">
+              <strong>Mission Notification Center</strong>
+              <span>View daily science challenges & alerts</span>
+            </div>
+            <span class="more-item-arrow">${window.CHEVRON_RIGHT_SVG}</span>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-row-text">
+              <strong>Cloud Hub Status</strong>
+              <span id="settings-cloud-status" style="color: #10b981; font-weight: 700;">🟢 Connected (os.shivteg.com)</span>
+            </div>
+            <button class="btn-primary-fun" id="btn-test-notif" style="padding: 6px 12px; font-size: 12px;">Test Alert</button>
+          </div>
+        </div>
+
         <!-- Safety & System -->
         <div class="settings-group-card">
           <h4>🛡️ Safety & Information</h4>
@@ -105,7 +126,7 @@ class SettingsView {
           <div class="settings-menu-row" id="row-help-about">
             <div class="settings-row-text">
               <strong>ℹ️ About Mini Science Lab</strong>
-              <span>Version 2.2.0 & Credits</span>
+              <span>Version 2.3.0 & Credits</span>
             </div>
             <span class="more-item-arrow">${window.CHEVRON_RIGHT_SVG}</span>
           </div>
@@ -183,6 +204,23 @@ class SettingsView {
         fn();
       };
     };
+
+    bind('#row-view-notifs', () => {
+      if (window.notificationService) {
+        window.notificationService.openNotificationCenter();
+      }
+    });
+
+    bind('#btn-test-notif', () => {
+      if (window.notificationService) {
+        window.notificationService.onNotificationReceived({
+          id: 'test_' + Date.now(),
+          title: '🔬 Mini Science Lab',
+          body: 'Test Notification: Real-time Cloud Push integration is active and running!',
+          timestamp: Date.now()
+        }, true);
+      }
+    });
 
     bind('#row-offline-info', () => this.showOfflineInfoModal());
     bind('#row-parental-controls', () => this.showParentalControlsModal());
